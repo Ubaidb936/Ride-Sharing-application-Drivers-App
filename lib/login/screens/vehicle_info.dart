@@ -1,4 +1,4 @@
-import 'package:drivers_app/DriversView/screens/MainPage.dart';
+import 'package:drivers_app/drivers_View/screens/MainPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';

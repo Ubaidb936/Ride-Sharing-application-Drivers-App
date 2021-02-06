@@ -1,7 +1,7 @@
-import 'package:drivers_app/DriversView/screens/tabs/acount_tab.dart';
-import 'package:drivers_app/DriversView/screens/tabs/earning_tab.dart';
-import 'package:drivers_app/DriversView/screens/tabs/home_tab.dart';
-import 'package:drivers_app/DriversView/screens/tabs/ratings_tab.dart';
+import 'package:drivers_app/drivers_View/screens/tabs/home_tab.dart';
+import 'package:drivers_app/drivers_View/screens/tabs/earning_tab.dart';
+import 'package:drivers_app/drivers_View/screens/tabs/ratings_tab.dart';
+import 'package:drivers_app/drivers_View/screens/tabs/acount_tab.dart';
 import 'package:drivers_app/app_colors.dart';
 import 'package:flutter/material.dart';
 

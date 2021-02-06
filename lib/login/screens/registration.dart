@@ -1,4 +1,4 @@
-import 'package:drivers_app/DriversView/screens/MainPage.dart';
+import 'package:drivers_app/drivers_View/screens/MainPage.dart';
 import 'package:drivers_app/login/screens/login_page.dart';
 import 'package:drivers_app/login/screens/vehicle_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
