@@ -1,4 +1,5 @@
 import 'package:drivers_app/drivers_View/screens/MainPage.dart';
+import 'package:drivers_app/global_variables.dart';
 import 'package:drivers_app/login/screens/vehicle_info.dart';
 import 'package:drivers_app/login/screens/login_page.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,7 @@ Future<void> main() async {
 
 
 
-  currentFirebaseUser= FirebaseAuth.instance.currentUser;
+   currentUser = FirebaseAuth.instance.currentUser;
   runApp( MyApp());
 }
 
@@ -66,7 +67,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
 
-      initialRoute: LoginPage.id,
+      initialRoute:(currentUser != null)? MainPage.id:LoginPage.id,
       routes: {
 
         Registration.id: (context)=> Registration(),

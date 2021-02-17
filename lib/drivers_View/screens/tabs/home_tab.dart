@@ -1,18 +1,28 @@
 import 'dart:async';
+import 'package:drivers_app/drivers_View/widgets/dialog.dart';
+import 'package:drivers_app/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:drivers_app/global_variables.dart';
 import 'package:drivers_app/drivers_View/widgets/bottom_sheet.dart';
+import 'package:drivers_app/helpers/pushnotifications.dart';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class HomeTab extends StatefulWidget {
   @override
   _HomeTabState createState() => _HomeTabState();
 }
+
+
+
+
 
 class _HomeTabState extends State<HomeTab> {
   final Completer<GoogleMapController> _controller = Completer();
@@ -21,6 +31,8 @@ class _HomeTabState extends State<HomeTab> {
   bool isAvailable = false;
   //double mapPadding = 0;
   // double height = Platform.isIOS ? 300 : 275;
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   var geoLocator = Geolocator();
   var locationOptions = LocationOptions(
@@ -87,6 +99,63 @@ class _HomeTabState extends State<HomeTab> {
     });
   }
 
+  void getDriverUserInfo() async{
+
+       //currentFirebaseUser = await FirebaseAuth.instance.currentUser;
+
+       PushNotificationsService pushNotificationsService = PushNotificationsService();
+       pushNotificationsService.initialize(context);
+       pushNotificationsService.getToken();
+
+
+
+  }
+
+
+
+  void testing(){
+
+
+    DatabaseReference newRideRef = FirebaseDatabase.instance.reference()
+        .child('rideRequests/12345');
+
+
+    Map userMap = {
+
+      'pickUp': 'Magam, Budgam',
+      'destination': 'Lalchowk, Srinagar',
+    };
+
+    DatabaseReference newTripRef = FirebaseDatabase.instance.reference()
+        .child('drivers/${currentUser.uid}/newTrip');
+
+    newTripRef.set('waiting....');
+
+
+    newRideRef.set(userMap);
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+  
+  @override
+  void initState() {
+   testing();
+   getDriverUserInfo();
+
+    //getDriverUserInfo();
+    super.initState();
+  }
   @override
   void dispose() {
     mapController.dispose();
@@ -131,80 +200,78 @@ class _HomeTabState extends State<HomeTab> {
               child: FlatButton(
                   child: !isAvailable? Text('Go online'): Text('Go offline'),
                   onPressed: () {
-
-
-                    scaffoldKey.currentState
-                        .showBottomSheet((context) => Container(
-                              height: 100,
-                              child: Column(
-                                children: [
-                                  !isAvailable? Text("Go Online"): Text("Go offline"),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  !isAvailable? Text("your are about to go online"): Text("you are about to go offline"),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                          decoration: BoxDecoration(
-                                              color: Colors.blue, borderRadius: BorderRadius.circular(30)),
-                                          child: FlatButton(
-                                        onPressed: (){
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text("Go Back"),
-                                        color: Colors.white,
-                                      )),
-
-
-                                      Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.greenAccent, borderRadius: BorderRadius.circular(30)),
-                                        child: FlatButton(
-                                          onPressed: (){
-
-                                            if(!isAvailable){
-
-                                              goOnline();
-                                              locationUpdates();
-
-                                              setState(() {
-
-                                                isAvailable = true;
-
-                                              });
-                                              Navigator.pop(context);
-
-
-                                            }else{
-
-                                                 goOffline();
-                                                 setState(() {
-
-                                                   isAvailable = false;
-
-                                                 });
-                                                 Navigator.pop(context);
-
-
-                                            }
-
-
-
-
-
-
-
-                                          },
-                                          child: Text("Confirm"),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ));
+                    // scaffoldKey.currentState
+                    //     .showBottomSheet((context) => Container(
+                    //           height: 100,
+                    //           child: Column(
+                    //             children: [
+                    //               !isAvailable? Text("Go Online"): Text("Go offline"),
+                    //               SizedBox(
+                    //                 height: 20,
+                    //               ),
+                    //               !isAvailable? Text("your are about to go online"): Text("you are about to go offline"),
+                    //               Row(
+                    //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //                 children: [
+                    //                   Container(
+                    //                       decoration: BoxDecoration(
+                    //                           color: Colors.blue, borderRadius: BorderRadius.circular(30)),
+                    //                       child: FlatButton(
+                    //                     onPressed: (){
+                    //                       Navigator.pop(context);
+                    //                     },
+                    //                     child: Text("Go Back"),
+                    //                     color: Colors.white,
+                    //                   )),
+                    //
+                    //
+                    //                   Container(
+                    //                     decoration: BoxDecoration(
+                    //                         color: Colors.greenAccent, borderRadius: BorderRadius.circular(30)),
+                    //                     child: FlatButton(
+                    //                       onPressed: (){
+                    //
+                    //                         if(!isAvailable){
+                    //
+                    //                           goOnline();
+                    //                           locationUpdates();
+                    //
+                    //                           setState(() {
+                    //
+                    //                             isAvailable = true;
+                    //
+                    //                           });
+                    //                           Navigator.pop(context);
+                    //
+                    //
+                    //                         }else{
+                    //
+                    //                              goOffline();
+                    //                              setState(() {
+                    //
+                    //                                isAvailable = false;
+                    //
+                    //                              });
+                    //                              Navigator.pop(context);
+                    //
+                    //
+                    //                         }
+                    //
+                    //
+                    //
+                    //
+                    //
+                    //
+                    //
+                    //                       },
+                    //                       child: Text("Confirm"),
+                    //                     ),
+                    //                   ),
+                    //                 ],
+                    //               )
+                    //             ],
+                    //           ),
+                    //         ));
                   }),
             ),
           ),
