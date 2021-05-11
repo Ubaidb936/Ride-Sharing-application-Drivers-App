@@ -1,3 +1,7 @@
+import 'package:drivers_app/drivers_View/datamodels/ride_details.dart';
+import 'package:drivers_app/drivers_View/helper/helpermethods.dart';
+import 'package:drivers_app/drivers_View/screens/MainPage.dart';
+import 'package:drivers_app/drivers_View/screens/driver_config.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:drivers_app/global_variables.dart';
@@ -6,11 +10,12 @@ import 'package:toast/toast.dart';
 
 class NotificationDialog extends StatelessWidget {
 
-  final pickUp;
-  final destination;
-  final rideId;
 
-  NotificationDialog({this.pickUp, this.destination, this.rideId});
+
+  RideDetails tripDetails;
+
+  NotificationDialog({this.tripDetails});
+
   void checkAvailability(context) async{
 
 
@@ -27,7 +32,6 @@ class NotificationDialog extends StatelessWidget {
       if(snapshot.value != null){
 
         newTrip = snapshot.value.toString();
-        print(newTrip);
 
       }else{
 
@@ -38,10 +42,17 @@ class NotificationDialog extends StatelessWidget {
       Navigator.pop(context);
 
 
-      if(newTrip == rideId){
+      if(newTrip == tripDetails.rideId){
 
          ///INCOMPLETE
         checkRef.set('Accepted');
+        HelperMethod.disableHomeTabLocationUpdates();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DriverConfig(tripDetails: tripDetails)),
+        );
+
+
         //Toast.show("Trip accepted", context, duration: Toast.LENGTH_SHORT, gravity:  Toast.BOTTOM);
 
 
@@ -111,7 +122,7 @@ class NotificationDialog extends StatelessWidget {
                 children: [
                   Image.asset('assets/images/pickicon.png'),
                   SizedBox(width: 20,),
-                  Text(pickUp),
+                  Expanded(child: Container(child: Text(tripDetails.pickup))),
               ],),
 
               SizedBox(
@@ -126,7 +137,7 @@ class NotificationDialog extends StatelessWidget {
 
                   Image.asset('assets/images/desticon.png'),
                   SizedBox(width: 20,),
-                  Text(destination),
+                  Expanded(child: Container(child: Text(tripDetails.destination))),
                 ],),
 
               SizedBox(

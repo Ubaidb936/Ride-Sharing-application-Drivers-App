@@ -94,7 +94,7 @@ class _VehicleInfoState extends State<VehicleInfo> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      resizeToAvoidBottomPadding: false,
+
       // backgroundColor: Colors.green,
       body: ListView(
         padding: EdgeInsets.zero,

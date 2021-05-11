@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      resizeToAvoidBottomPadding: false,
+
       // backgroundColor: Colors.green,
       body: ListView(
         padding: EdgeInsets.zero,

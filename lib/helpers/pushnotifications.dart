@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:drivers_app/drivers_View/datamodels/ride_details.dart';
 import 'package:drivers_app/drivers_View/widgets/dialog.dart';
 import 'package:drivers_app/global_variables.dart';
 import 'package:drivers_app/main.dart';
@@ -8,8 +11,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:drivers_app/global_variables.dart';
-
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:provider/provider.dart';
+import 'package:drivers_app/drivers_View/dataProvider/appdata.dart';
 
 Future<dynamic> myBackgroundHandler(Map<String, dynamic> message) {
 
@@ -78,42 +83,38 @@ class PushNotificationsService {
 
 
   Future initialize(context) async {
+
+    String rideId;
+
     fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
-
-        String rideId = message["data"]["ride_id"];
-        getRideId(rideId, context);
+        rideId = getRideId(message);
+        fetchRideInfo(rideId, context);
       },
       //onBackgroundMessage: myBackgroundHandler,
       onLaunch: (Map<String, dynamic> message) async {
-        AssetsAudioPlayer.newPlayer().open(
-          Audio("assets/audios/alert.mp3"),
-          autoStart: true,
-          showNotification: true,
-        );
-        String rideId = message["data"]["ride_id"];
-        getRideId(rideId, context);
+         rideId = getRideId(message);
+         fetchRideInfo(rideId, context);
       },
       onResume: (Map<String, dynamic> message) async {
-        AssetsAudioPlayer.newPlayer().open(
-          Audio("assets/audios/alert.mp3"),
-          autoStart: true,
-          showNotification: true,
-        );
-        String rideId = message["data"]["ride_id"];
-        getRideId(rideId, context);
+        rideId = getRideId(message);
+        fetchRideInfo(rideId, context);
       },
     );
   }
 
 
-  void getRideId(String id, context) async {
-    DatabaseReference rideRef = FirebaseDatabase.instance.reference().child(
-        "rideRequests/$id");
-    String pickUp;
+  void fetchRideInfo(rideId, context) async{
+
+
     String destination;
-    await rideRef.once().then((DataSnapshot snapshot) {
-      print(snapshot.value);
+
+    DatabaseReference rideRef = FirebaseDatabase.instance.reference().child(
+        "rideRequest/$rideId");
+
+
+    await rideRef.once().then((DataSnapshot snapshot) async{
+     // print(snapshot.value);
       if (snapshot.value != null) {
 
         assetAudioPlayer = AssetsAudioPlayer();
@@ -126,18 +127,54 @@ class PushNotificationsService {
 
         //assetAudioPlayer.play();
 
-        pickUp = snapshot.value["pickUp"];
+        double pickupLat = double.parse(snapshot.value['pickUpLatLng']['lat'].toString());
+        double pickupLng = double.parse(snapshot.value['pickUpLatLng']['lng'].toString());
+        String pickUp = snapshot.value["pick_up"];
+        
+        
+        double desLat = double.parse(snapshot.value['destinationLatLng']['lat'].toString());
+        double desLng = double.parse(snapshot.value['destinationLatLng']['lng'].toString());
         destination = snapshot.value["destination"];
 
+        RideDetails tripDetails = RideDetails();
+        tripDetails.rideId = rideId;
+        tripDetails.pickup = pickUp;
+        tripDetails.destination = destination;
+        tripDetails.pickLatLng = LatLng(pickupLat, pickupLng);
+        tripDetails.desLatLng = LatLng(desLat, desLng);
 
-        showDialog(context: context, builder: (BuildContext context) =>NotificationDialog(pickUp: pickUp, destination: destination, rideId: id,));
 
-
+        Provider.of<AppData>(context, listen: false).updateRideDetails(tripDetails);
+        showDialog(context: context, builder: (BuildContext context) =>NotificationDialog(tripDetails: tripDetails,));
 
 
       }
     });
+
+
+
+
   }
+  String getRideId(Map<String, dynamic> message){
+
+
+      String rideId  = '';
+      if(Platform.isAndroid){
+        rideId = message["data"]["ride_id"];
+      }
+
+
+
+    return rideId;
+
+
+
+
+
+  }
+
+
+
 
 
     //   showDialog(
@@ -184,7 +221,6 @@ class PushNotificationsService {
 
     Future<String> getToken() async {
       String token = await fcm.getToken();
-      currentUser = FirebaseAuth.instance.currentUser;
 
       print("---------------------------------------");
       print(token);

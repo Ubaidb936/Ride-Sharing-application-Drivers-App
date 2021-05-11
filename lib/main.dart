@@ -1,4 +1,6 @@
+import 'package:drivers_app/drivers_View/dataProvider/appdata.dart';
 import 'package:drivers_app/drivers_View/screens/MainPage.dart';
+import 'package:drivers_app/drivers_View/screens/driver_config.dart';
 import 'package:drivers_app/global_variables.dart';
 import 'package:drivers_app/login/screens/vehicle_info.dart';
 import 'package:drivers_app/login/screens/login_page.dart';
@@ -57,25 +59,29 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
+    return ChangeNotifierProvider<AppData>(
+      create: (context) => AppData() ,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
 
-        primarySwatch: Colors.blue,
+          primarySwatch: Colors.blue,
 
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+
+        initialRoute:(currentUser != null)? MainPage.id:LoginPage.id,
+        routes: {
+
+          Registration.id: (context)=> Registration(),
+          LoginPage.id: (context) => LoginPage(),
+          VehicleInfo.id: (context) => VehicleInfo(),
+          MainPage.id: (context)=> MainPage(),
+          DriverConfig.id: (context) => DriverConfig()
+
+        },
       ),
-
-      initialRoute:(currentUser != null)? MainPage.id:LoginPage.id,
-      routes: {
-
-        Registration.id: (context)=> Registration(),
-        LoginPage.id: (context) => LoginPage(),
-        VehicleInfo.id: (context) => VehicleInfo(),
-        MainPage.id: (context)=> MainPage()
-
-      },
     );
   }
 }

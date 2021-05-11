@@ -46,7 +46,7 @@ dependencies:
   assets_audio_player: ^2.0.13+8
   toast: ^0.1.5
   progress_dialog: ^1.2.4
-
+  flutter_polyline_points: ^0.2.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

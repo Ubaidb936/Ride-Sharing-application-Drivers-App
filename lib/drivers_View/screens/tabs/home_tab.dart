@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:drivers_app/constants.dart';
+import 'package:drivers_app/drivers_View/datamodels/driver.dart';
+import 'package:drivers_app/drivers_View/helper//helpermethods.dart';
 import 'package:drivers_app/drivers_View/widgets/dialog.dart';
 import 'package:drivers_app/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,10 +23,6 @@ class HomeTab extends StatefulWidget {
   _HomeTabState createState() => _HomeTabState();
 }
 
-
-
-
-
 class _HomeTabState extends State<HomeTab> {
   final Completer<GoogleMapController> _controller = Completer();
   GoogleMapController mapController;
@@ -32,12 +31,13 @@ class _HomeTabState extends State<HomeTab> {
   //double mapPadding = 0;
   // double height = Platform.isIOS ? 300 : 275;
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   var geoLocator = Geolocator();
   var locationOptions = LocationOptions(
       accuracy: LocationAccuracy.bestForNavigation, distanceFilter: 4);
-  Position currentPosition;
+
 
   DatabaseReference tripReference;
   void setupPositionLocator() async {
@@ -47,13 +47,8 @@ class _HomeTabState extends State<HomeTab> {
     LatLng pos = LatLng(position.latitude, position.longitude);
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     mapController.animateCamera(CameraUpdate.newCameraPosition(cp));
-    //var pickUp = await HelperMethod.findCoordinateAddress(position, context);
+    var pickUp = await HelperMethod.findCoordinateAddress(position, context);
   }
-
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
 
   void goOnline() {
     Geofire.initialize('driversAvailable');
@@ -64,21 +59,18 @@ class _HomeTabState extends State<HomeTab> {
         .reference()
         .child('drivers/${currentUser.uid}/newTrip');
     tripReference.set('waiting.....');
-    tripReference.onValue.listen((event) { });
+    tripReference.onValue.listen((event) {});
   }
 
-  void goOffline(){
-
+  void goOffline() {
     Geofire.removeLocation(currentUser.uid);
     tripReference.onDisconnect();
     tripReference.remove();
     tripReference = null;
-
-
   }
 
   void locationUpdates() {
-    StreamSubscription<Position> homeTapPositionStream;
+
 
     homeTapPositionStream = Geolocator.getPositionStream(
             desiredAccuracy: LocationAccuracy.bestForNavigation,
@@ -86,11 +78,9 @@ class _HomeTabState extends State<HomeTab> {
         .listen((Position position) {
       currentPosition = position;
 
-      if(isAvailable){
-
+      if (isAvailable) {
         Geofire.setLocation(
             currentUser.uid, position.latitude, position.longitude);
-
       }
 
       LatLng pos = LatLng(position.latitude, position.longitude);
@@ -99,63 +89,43 @@ class _HomeTabState extends State<HomeTab> {
     });
   }
 
-  void getDriverUserInfo() async{
+  void getDriverUserInfo() async {
+    currentUser =  FirebaseAuth.instance.currentUser;
 
-       //currentFirebaseUser = await FirebaseAuth.instance.currentUser;
+    DatabaseReference driverRef = FirebaseDatabase.instance.reference().child('drivers/${currentUser.uid}');
 
-       PushNotificationsService pushNotificationsService = PushNotificationsService();
-       pushNotificationsService.initialize(context);
-       pushNotificationsService.getToken();
+    driverRef.once().then((DataSnapshot snapshot){
+      print("--------------fullname---------------------");
+      //print(snapshot.value);
+      if (snapshot.value != null) {
+
+        driverDetails =  DriverDetails.fromSnapshot(snapshot);
+
+      }
+
+    });
 
 
 
+
+
+    PushNotificationsService pushNotificationsService =
+        PushNotificationsService();
+    pushNotificationsService.initialize(context);
+    pushNotificationsService.getToken();
   }
 
 
 
-  void testing(){
-
-
-    DatabaseReference newRideRef = FirebaseDatabase.instance.reference()
-        .child('rideRequests/12345');
-
-
-    Map userMap = {
-
-      'pickUp': 'Magam, Budgam',
-      'destination': 'Lalchowk, Srinagar',
-    };
-
-    DatabaseReference newTripRef = FirebaseDatabase.instance.reference()
-        .child('drivers/${currentUser.uid}/newTrip');
-
-    newTripRef.set('waiting....');
-
-
-    newRideRef.set(userMap);
-
-
-
-  }
-
-
-
-
-
-
-
-
-
-
-  
   @override
   void initState() {
-   testing();
-   getDriverUserInfo();
 
-    //getDriverUserInfo();
+
+
+    getDriverUserInfo();
     super.initState();
   }
+
   @override
   void dispose() {
     mapController.dispose();
@@ -173,7 +143,7 @@ class _HomeTabState extends State<HomeTab> {
             //padding: EdgeInsets.only(bottom: mapPadding),
             mapType: MapType.normal,
             myLocationButtonEnabled: true,
-            initialCameraPosition: _kGooglePlex,
+            initialCameraPosition: kGooglePlex,
             myLocationEnabled: true,
             zoomGesturesEnabled: true,
             zoomControlsEnabled: true,
@@ -190,88 +160,89 @@ class _HomeTabState extends State<HomeTab> {
           Positioned(
             left: 0,
             right: 0,
-            top: 10,
+            top: 25,
             child: Container(
               height: 50,
               width: 50,
               decoration: BoxDecoration(
-                  color: isAvailable? Colors.red: Colors.blue,
+                  color: isAvailable ? Colors.red : Colors.blue,
                   borderRadius: BorderRadius.circular(30)),
               child: FlatButton(
-                  child: !isAvailable? Text('Go online'): Text('Go offline'),
+                  child: !isAvailable ? Text('Go online') : Text('Go offline'),
                   onPressed: () {
-                    // scaffoldKey.currentState
-                    //     .showBottomSheet((context) => Container(
-                    //           height: 100,
-                    //           child: Column(
-                    //             children: [
-                    //               !isAvailable? Text("Go Online"): Text("Go offline"),
-                    //               SizedBox(
-                    //                 height: 20,
-                    //               ),
-                    //               !isAvailable? Text("your are about to go online"): Text("you are about to go offline"),
-                    //               Row(
-                    //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //                 children: [
-                    //                   Container(
-                    //                       decoration: BoxDecoration(
-                    //                           color: Colors.blue, borderRadius: BorderRadius.circular(30)),
-                    //                       child: FlatButton(
-                    //                     onPressed: (){
-                    //                       Navigator.pop(context);
-                    //                     },
-                    //                     child: Text("Go Back"),
-                    //                     color: Colors.white,
-                    //                   )),
-                    //
-                    //
-                    //                   Container(
-                    //                     decoration: BoxDecoration(
-                    //                         color: Colors.greenAccent, borderRadius: BorderRadius.circular(30)),
-                    //                     child: FlatButton(
-                    //                       onPressed: (){
-                    //
-                    //                         if(!isAvailable){
-                    //
-                    //                           goOnline();
-                    //                           locationUpdates();
-                    //
-                    //                           setState(() {
-                    //
-                    //                             isAvailable = true;
-                    //
-                    //                           });
-                    //                           Navigator.pop(context);
-                    //
-                    //
-                    //                         }else{
-                    //
-                    //                              goOffline();
-                    //                              setState(() {
-                    //
-                    //                                isAvailable = false;
-                    //
-                    //                              });
-                    //                              Navigator.pop(context);
-                    //
-                    //
-                    //                         }
-                    //
-                    //
-                    //
-                    //
-                    //
-                    //
-                    //
-                    //                       },
-                    //                       child: Text("Confirm"),
-                    //                     ),
-                    //                   ),
-                    //                 ],
-                    //               )
-                    //             ],
-                    //           ),
-                    //         ));
+                    scaffoldKey.currentState
+                        .showBottomSheet((context) => Container(
+                              height: 150,
+                              child: Column(
+                                children: [
+                                  !isAvailable
+                                      ? Text("Go Online")
+                                      : Text("Go offline"),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  !isAvailable
+                                      ? Text("your are about to go online")
+                                      : Text("you are about to go offline"),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      //mainAxisAlignment:
+                                         // MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                              height: 50,
+                                              width: 100,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.blue,
+                                                  borderRadius:
+                                                      BorderRadius.circular(30)),
+                                              child: Center(child: Text("Go Back"))),
+                                        ),
+
+
+                                        Spacer(),
+                                        GestureDetector(
+                                          onTap: (){
+
+
+                                            if (!isAvailable) {
+                                              goOnline();
+                                              locationUpdates();
+
+                                              setState(() {
+                                                isAvailable = true;
+                                              });
+                                            } else {
+                                              goOffline();
+                                              setState(() {
+                                                isAvailable = false;
+                                              });
+                                            }
+
+                                            Navigator.pop(context);
+
+                                          },
+                                          child: Container(
+                                            height: 50,
+                                            width: 100,
+                                            decoration: BoxDecoration(
+                                                color: Colors.greenAccent,
+                                                borderRadius:
+                                                    BorderRadius.circular(30)),
+                                            child: Center(child: Text("Confirm")),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ));
                   }),
             ),
           ),

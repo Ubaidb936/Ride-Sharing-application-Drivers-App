@@ -3,6 +3,8 @@ import 'package:drivers_app/drivers_View/screens/tabs/earning_tab.dart';
 import 'package:drivers_app/drivers_View/screens/tabs/ratings_tab.dart';
 import 'package:drivers_app/drivers_View/screens/tabs/acount_tab.dart';
 import 'package:drivers_app/app_colors.dart';
+import 'package:drivers_app/global_variables.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
@@ -27,9 +29,24 @@ class _MainPageState extends State<MainPage>  with SingleTickerProviderStateMixi
 
   }
 
+  void getUser(){
+
+   currentUser = FirebaseAuth.instance.currentUser;
+
+
+   print("------------------------------------------------------");
+   print(currentUser.email);
+
+
+
+
+  }
+
   @override
   void initState() {
     // TODO: implement initState
+
+    getUser();
     super.initState();
 
     _tabController = TabController(length: 4, vsync: this);
