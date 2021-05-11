@@ -90,7 +90,7 @@ class _RegistrationState extends State<Registration> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      resizeToAvoidBottomPadding: false,
+
       // backgroundColor: Colors.green,
       body: ListView(
         padding: EdgeInsets.zero,
